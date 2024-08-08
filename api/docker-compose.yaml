@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: .
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/opt/app
+    environment:
+      DB_HOST: database
+      DB_USER: lolek
+      DB_PASSWORD: tajne
+      DB_NAME: surveys
+      DB_PORT: 5432
+      SECRET_API_KEY: SECRET_API_KEY
+    depends_on:
+      - database
+
+  database:
+    image: postgres:13.2-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: lolek
+      POSTGRES_PASSWORD: tajne
+      POSTGRES_DB: surveys
+
