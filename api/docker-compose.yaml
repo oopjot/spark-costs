@@ -2,6 +2,7 @@ services:
   api:
     build:
       context: .
+    command: uvicorn main:app --host 0.0.0.0 --reload
     restart: always
     ports:
       - 8000:8000
@@ -17,8 +18,29 @@ services:
     depends_on:
       - database
 
+  worker:
+    build:
+      context: .
+    command: celery -A worker.celery worker --loglevel=INFO
+    restart: always
+    volumes:
+      - .:/opt/app
+    environment:
+      DB_HOST: database
+      DB_USER: lolek
+      DB_PASSWORD: tajne
+      DB_NAME: surveys
+      DB_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      - redis
+      - database
+
   database:
-    image: postgres:13.2-alpine
+    image: postgres:16-alpine
     ports:
       - 5432:5432
     environment:
@@ -26,3 +48,5 @@ services:
       POSTGRES_PASSWORD: tajne
       POSTGRES_DB: surveys
 
+  redis:
+    image: redis

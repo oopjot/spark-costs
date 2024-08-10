@@ -62,6 +62,7 @@ def create_usage(session: Session, instance_id: str, usage_schema: schema.UsageC
 def mark_container_finished(session: Session, container_name: str):
     container = get_container_by_name(session, container_name)
     if container is None:
+        print(container_name)
         # TODO: custom excetpion
         raise Exception("Container not found.")
     container.finished = True

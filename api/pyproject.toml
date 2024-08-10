@@ -11,6 +11,9 @@ fastapi = {extras = ["all"], version = "^0.108.0"}
 sqlalchemy = "^2.0.25"
 psycopg2-binary = "^2.9.9"
 requests = "^2.32.3"
+celery = "^5.4.0"
+redis = "^5.0.8"
+boto3 = "^1.34.158"
 
 
 [build-system]

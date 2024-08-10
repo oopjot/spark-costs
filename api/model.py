@@ -50,6 +50,8 @@ class Container(Base):
     application_id: Mapped[int] = mapped_column(ForeignKey("application.id"))
     application: Mapped[Application] = relationship(back_populates="containers")
 
+    cost: Mapped["ContainerCost"] = relationship(back_populates="container")
+
 class Usage(Base):
     __tablename__ = "usage"
 
@@ -63,4 +65,14 @@ class Usage(Base):
     
     container_id: Mapped[int] = mapped_column(ForeignKey("container.id"))
     container: Mapped[Container] = relationship(back_populates="usages")
+
+class ContainerCost(Base):
+    __tablename__ = "container_cost"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    amount_int: Mapped[int]
+    amount_dec: Mapped[int]
+
+    container_id: Mapped[int] = mapped_column(ForeignKey("container.id"))
+    container: Mapped[Container] = relationship(back_populates="cost")
 
