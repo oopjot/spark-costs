@@ -1,14 +1,9 @@
 from datetime import datetime
-from enum import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
     pass
-
-class Kind(Enum):
-    ON_DEMAND = "on-demand"
-    SPOT = "spot"
 
 class Instance(Base):
     __tablename__ = "instance"
@@ -70,8 +65,7 @@ class ContainerCost(Base):
     __tablename__ = "container_cost"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    amount_int: Mapped[int]
-    amount_dec: Mapped[int]
+    amount: Mapped[int]
 
     container_id: Mapped[int] = mapped_column(ForeignKey("container.id"))
     container: Mapped[Container] = relationship(back_populates="cost")

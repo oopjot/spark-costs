@@ -18,7 +18,7 @@ import (
 const (
   USAGE_URL = "http://127.0.0.1:8080/instance/%s/usage"
   INIT_URL = "http://127.0.0.1:8080/instance"
-  FINISHED_URL = "http://127.0.0.1:8080/container/%s/finished"
+  FINISHED_URL = "http://127.0.0.1:8080/container/%s/finish"
 )
 
 // /mnt1/yarn/usercache/hadoop/appcache/application_1697720075274_7464/container_1697720075274_7464_01_000036 <nil>

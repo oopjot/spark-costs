@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 
-from model import Kind
+from enums import Kind
 
 class InstanceCreate(BaseModel):
     instance_id: str

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import requests as r
 import random
 import time
@@ -42,7 +44,7 @@ type Instance struct {
 
 USAGE_URL = "http://127.0.0.1:8000/instance/{}/usage"
 INIT_URL = "http://127.0.0.1:8000/instance"
-FINISHED_URL = "http://127.0.0.1:8000/container/%s/finished"
+FINISHED_URL = "http://127.0.0.1:8000/container/{}/finish"
 
 NODE_TYPES = ["m5.8xlarge", "m5.16xlarge", "m5.4xlarge"]
 NODE_KINDS = ["on-demand", "spot"]
@@ -107,6 +109,8 @@ def generate_container_usage(instance_id, app_name, container_name):
         time.sleep(2)
         count += 1
         if count == 10:
+            res = r.post(FINISHED_URL.format(container_name))
+            print(res.json())
             running = False
 
 

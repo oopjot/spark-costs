@@ -1,6 +1,7 @@
-from sqlalchemy import select
+from sqlalchemy import select 
 from sqlalchemy.orm import Session
-from model import Usage, Container, Application, Instance
+from sqlalchemy.sql import func
+from model import Usage, Container, Application, Instance, ContainerCost
 import schema
 from datetime import datetime
 
@@ -69,3 +70,40 @@ def mark_container_finished(session: Session, container_name: str):
     session.add(container)
     return container
 
+def get_container_first_usage(session: Session, container: Container):
+    stmt = select(Usage).where(Container.id == container.id).order_by(Usage.time.asc())
+    usage = session.scalars(stmt)
+    if not usage:
+        raise Exception("Usage not found")
+    return usage.one()
+
+def get_container_last_usage(session: Session, container: Container):
+    stmt = select(Usage).where(Container.id == container.id).order_by(Usage.time.desc())
+    usage = session.scalars(stmt)
+    if not usage:
+        raise Exception("Usage not found")
+    return usage.one()
+
+def get_container_average_cpu_usage(session: Session, container: Container):
+    stmt = select(func.avg(Usage.cpu_usage)).where(Container.id == container.id)
+    average_usage = session.scalar(stmt)
+    return average_usage
+
+def create_container_cost(session: Session, container: Container, amount: int):
+    cost = ContainerCost(amount=amount, container_id=container.id)
+    session.add(cost)
+    return cost
+
+def maybe_mark_application_finished(session: Session, application_id: int):
+    stmt = select(func.bool_and(Container.finished)).where(Container.application_id == application_id)
+    finished = session.scalar(stmt)
+    if not finished:
+        return False
+    stmt = select(Application).where(Application.id == application_id)
+    app = session.scalar(stmt)
+    if app is None:
+        # TODO: Custom exception
+        raise Exception("Application not found.")
+    app.finished = True
+    session.add(app)
+    return finished
