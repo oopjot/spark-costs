@@ -32,3 +32,7 @@ async def handle_container_finished(container_name: str, db: Session = Depends(g
     worker.calculate_container_cost.delay(container_name)
     return {"id": container.id}
 
+@app.get("/applications")
+async def list_applications(db: Session = Depends(get_db)):
+    applications = crud.list_applications(db)
+    return list(applications)

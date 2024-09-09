@@ -2,8 +2,8 @@ FROM python:3.11-alpine
 ENV PYTHONBUFFERED 1
 RUN set -e;
 
-RUN apk update && \
-    apk add build-base cargo libpq-dev libffi-dev
+RUN apk add --no-cache libpq-dev libffi-dev && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /opt/app
 

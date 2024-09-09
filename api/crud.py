@@ -71,14 +71,14 @@ def mark_container_finished(session: Session, container_name: str):
     return container
 
 def get_container_first_usage(session: Session, container: Container):
-    stmt = select(Usage).where(Container.id == container.id).order_by(Usage.time.asc())
+    stmt = select(Usage).where(Container.id == container.id).order_by(Usage.time.asc()).limit(1)
     usage = session.scalars(stmt)
     if not usage:
         raise Exception("Usage not found")
     return usage.one()
 
 def get_container_last_usage(session: Session, container: Container):
-    stmt = select(Usage).where(Container.id == container.id).order_by(Usage.time.desc())
+    stmt = select(Usage).where(Container.id == container.id).order_by(Usage.time.desc()).limit(1)
     usage = session.scalars(stmt)
     if not usage:
         raise Exception("Usage not found")
@@ -107,3 +107,10 @@ def maybe_mark_application_finished(session: Session, application_id: int):
     app.finished = True
     session.add(app)
     return finished
+
+def list_applications(session: Session):
+    stmt = select(Application, func.sum(ContainerCost.amount.label("cost"))).join(Container, Application.containers).join(ContainerCost, Container.cost).group_by(Application.id)
+
+
+    return session.scalars(stmt)
+

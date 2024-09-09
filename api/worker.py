@@ -26,10 +26,9 @@ def get_elapsed_hours(first_ts, last_ts):
 
 
 def get_region_name(region):
-    if AWS_REGION_MAP is None:
-        AWS_REGION_MAP = config.load_region_map()
+    aws_region_map = config.load_region_map()
 
-    region_name = AWS_REGION_MAP[region]["description"]
+    region_name = aws_region_map[region]["description"]
     region_name = region_name.replace("Europe", "EU")
     return region_name
 
@@ -86,7 +85,8 @@ def calculate_container_cost(container_name):
     if container is None:
         # TODO: custom exception
         raise Exception("Container not found.")
-    if container.instance.kind == Kind.ON_DEMAND:
+    if container.instance.kind == Kind.ON_DEMAND.value:
+        print("-----CALCULATING ON DEMAND-----")
         process_on_demand_container(session, container)
     else:
         process_spot_container(session, container)
