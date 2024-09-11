@@ -3,7 +3,7 @@
 import requests as r
 import random
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4 as uuid
 from threading import Thread
 
@@ -87,10 +87,10 @@ def generate_container_usage(instance_id, app_name, container_name):
     start = datetime.now()
     then = start
     count = 0
-    print(container_name, "started")
+    then = datetime.now()
     while running:
-        now = datetime.now()
-        process_time += (now - then).microseconds / 1000
+        now = then + timedelta(seconds=2)
+        process_time += 2000
         then = now
 
         usage_data = {
@@ -106,9 +106,8 @@ def generate_container_usage(instance_id, app_name, container_name):
         print(now, container_name, usage_data)
         r.post(USAGE_URL.format(instance_id), json=usage_data)
 
-        time.sleep(2)
         count += 1
-        if count == 10:
+        if count == 600:
             res = r.post(FINISHED_URL.format(container_name))
             print(res.json())
             running = False

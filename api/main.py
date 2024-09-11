@@ -23,11 +23,6 @@ async def handle_usage(instance_id: str, usage_data: schema.UsageCreate, db: Ses
 @app.post("/container/{container_name}/finish")
 async def handle_container_finished(container_name: str, db: Session = Depends(get_db)):
     container = crud.mark_container_finished(db, container_name)
-    app_finished = True
-    for c in container.application.containers:
-        app_finished = c.finished
-    if app_finished:
-        container.application.finished = True
     db.commit()
     worker.calculate_container_cost.delay(container_name)
     return {"id": container.id}
@@ -35,4 +30,4 @@ async def handle_container_finished(container_name: str, db: Session = Depends(g
 @app.get("/applications")
 async def list_applications(db: Session = Depends(get_db)):
     applications = crud.list_applications(db)
-    return list(applications)
+    return [ {"application": app, "cost": cost} for app, cost in applications]

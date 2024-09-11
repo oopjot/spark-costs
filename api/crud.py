@@ -25,7 +25,7 @@ def create_instance(session: Session, instance_schema: schema.InstanceCreate):
     session.add(instance)
     return instance
 
-def create_application(session: Session, name: str):
+def create_application(session: Session, name: str): 
     app = Application(name=name)
     session.add(app)
     return app
@@ -47,7 +47,8 @@ def create_usage(session: Session, instance_id: str, usage_schema: schema.UsageC
     app = get_application_by_name(session, app_name)
     if app is None:
         app = create_application(session, app_name)
-    session.add(app)
+    else:
+        session.add(app)
 
     container_name = data.pop("container")
     container = get_container_by_name(session, container_name)
@@ -57,6 +58,7 @@ def create_usage(session: Session, instance_id: str, usage_schema: schema.UsageC
 
     data["start"] = datetime.utcfromtimestamp(data.pop("start"))
     usage = Usage(container=container, **data)
+    app.start_time = data["start"]
     session.add(usage)
     return usage
 
@@ -71,7 +73,7 @@ def mark_container_finished(session: Session, container_name: str):
     return container
 
 def get_container_first_usage(session: Session, container: Container):
-    stmt = select(Usage).where(Container.id == container.id).order_by(Usage.time.asc()).limit(1)
+    stmt = select(Usage).where(Usage.container_id == container.id).order_by(Usage.time.asc()).limit(1)
     usage = session.scalars(stmt)
     if not usage:
         raise Exception("Usage not found")
@@ -85,7 +87,15 @@ def get_container_last_usage(session: Session, container: Container):
     return usage.one()
 
 def get_container_average_cpu_usage(session: Session, container: Container):
-    stmt = select(func.avg(Usage.cpu_usage)).where(Container.id == container.id)
+    stmt = select(func.avg(Usage.cpu_usage)).where(Usage.container_id == container.id)
+    average_usage = session.scalar(stmt)
+    return average_usage
+
+def get_container_average_cpu_usage_for_time_range(session: Session, container: Container, start: int, end: int):
+    stmt = select(func.avg(Usage.cpu_usage)).where(
+        (Usage.container_id == container.id) &
+        (Usage.time > start) &
+        (Usage.time < end))
     average_usage = session.scalar(stmt)
     return average_usage
 
@@ -109,8 +119,19 @@ def maybe_mark_application_finished(session: Session, application_id: int):
     return finished
 
 def list_applications(session: Session):
-    stmt = select(Application, func.sum(ContainerCost.amount.label("cost"))).join(Container, Application.containers).join(ContainerCost, Container.cost).group_by(Application.id)
+    stmt = (select(Application, func.sum(ContainerCost.amount.label("cost")))
+            .join(Container, Application.containers)
+            .join(ContainerCost, Container.cost)
+            .group_by(Application.id))
+    return session.execute(stmt)
 
+def maybe_update_application_finish_time(session: Session, container: Container, last_usage: Usage | None = None):
+    current_finish_time = container.application.finish_time
+    if last_usage is None:
+        last_usage = get_container_last_usage(session, container)
+    last_usage_datetime = datetime.fromtimestamp(last_usage.time)
+    if current_finish_time is None or current_finish_time < last_usage_datetime:
+        container.application.finish_time = last_usage_datetime
+        session.add(container)
 
-    return session.scalars(stmt)
 

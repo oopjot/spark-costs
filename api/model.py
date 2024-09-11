@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -28,6 +29,8 @@ class Application(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
     finished: Mapped[bool] = mapped_column(default=False)
+    start_time: Mapped[datetime]
+    finish_time: Mapped[Optional[datetime]]
 
     containers: Mapped[list["Container"]] = relationship(back_populates="application")
 
@@ -65,7 +68,7 @@ class ContainerCost(Base):
     __tablename__ = "container_cost"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    amount: Mapped[int]
+    amount: Mapped[float]
 
     container_id: Mapped[int] = mapped_column(ForeignKey("container.id"))
     container: Mapped[Container] = relationship(back_populates="cost")

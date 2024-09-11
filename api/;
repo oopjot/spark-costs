@@ -123,7 +123,7 @@ def process_spot_container(session, container):
             i += 1
         
     crud.create_container_cost(session, container, container_cost_amount)
-    crud.maybe_update_application_finish_time(session, container, last_usage)
+    crud.maybe_update_application_finish_time(session, container)
 
 @celery.task(name="calculate_container_cost")
 def calculate_container_cost(container_name):
@@ -137,7 +137,6 @@ def calculate_container_cost(container_name):
         print("-----CALCULATING ON DEMAND-----")
         process_on_demand_container(session, container)
     else:
-        print("-----CALCULATING SPOT------")
         process_spot_container(session, container)
 
     crud.maybe_mark_application_finished(session, container.application_id)
