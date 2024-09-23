@@ -47,8 +47,7 @@ type Instance struct {
   Architecture string `json:"architecture"`
 }
 
-func totalCPUTime(fs *procfs.FS) float64 {
-  s, _ := fs.Stat()
+func totalCPUTime(s *procfs.ProcStat) float64 {
   c := s.CPUTotal
   user := c.User - c.Guest
   nice := c.Nice - c.GuestNice
@@ -76,7 +75,7 @@ func monitor(fs *procfs.FS, pid int, fc chan Usage, uc chan Usage) {
   app, container := appName(&p)
   pstat, _ := p.Stat()
   start, _ := pstat.StartTime()
-  totalCPU := totalCPUTime(fs)
+  totalCPU := totalCPUTime(pstat)
   u := Usage{
     PID: p.PID,
     App: app,

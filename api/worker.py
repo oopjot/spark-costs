@@ -87,7 +87,7 @@ def get_spot_prices(instance_type, az, start_ts, end_ts, region="us-west-2"):
     start_dt = datetime.fromtimestamp(start_ts)
     end_dt = datetime.fromtimestamp(end_ts)
 
-    client = boto3.client("ec2", region=region)
+    client = boto3.client("ec2", region_name=region)
     response = client.describe_spot_price_history(
         StartTime=start_dt,
         EndTime=end_dt,
@@ -95,8 +95,8 @@ def get_spot_prices(instance_type, az, start_ts, end_ts, region="us-west-2"):
         InstanceTypes=[instance_type],
         ProductDescriptions=["Linux/UNIX"]
     )
-    response.reverse()
-    return [{"timestamp": datetime.timestamp(r["Timestamp"]), "price": r["SpotPrice"]} for r in response]
+    items = response["SpotPriceHistory"][::-1]
+    return [{"timestamp": datetime.timestamp(i["Timestamp"]), "price": float(i["SpotPrice"])} for i in items]
 
 def process_spot_container(session, container):
     first_usage = crud.get_container_first_usage(session, container)
@@ -134,10 +134,8 @@ def calculate_container_cost(container_name):
         # TODO: custom exception
         raise Exception("Container not found.")
     if container.instance.kind == Kind.ON_DEMAND.value:
-        print("-----CALCULATING ON DEMAND-----")
         process_on_demand_container(session, container)
     else:
-        print("-----CALCULATING SPOT------")
         process_spot_container(session, container)
 
     crud.maybe_mark_application_finished(session, container.application_id)

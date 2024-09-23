@@ -10,6 +10,14 @@ def get_application_by_name(session: Session, name: str):
     app = session.scalar(stmt)
     return app
 
+def get_application_cost_by_name(session: Session, name: str):
+    stmt = (select(func.sum(ContainerCost.amount))
+            .where(Application.name == name)
+            .join(Container, Application.containers)
+            .join(ContainerCost, Container.cost)
+            .group_by(Application.id))
+    return session.scalar(stmt)
+
 def get_container_by_name(session: Session, name: str):
     stmt = select(Container).where(Container.name == name)
     container = session.scalar(stmt)
@@ -119,7 +127,7 @@ def maybe_mark_application_finished(session: Session, application_id: int):
     return finished
 
 def list_applications(session: Session):
-    stmt = (select(Application, func.sum(ContainerCost.amount.label("cost")))
+    stmt = (select(Application, func.sum(ContainerCost.amount).label("cost"))
             .join(Container, Application.containers)
             .join(ContainerCost, Container.cost)
             .group_by(Application.id))

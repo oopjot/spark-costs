@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detail</title>
+    <link href="{{ url_for('static', path='styles.css') }}" rel="stylesheet">
+  </head>
+  <body>
+    <h2>{{ app.name }}</h2>
+    <div class="details-container">
+      <table class="v">
+        <tr>
+          <th>Name</th>
+          <td>{{ app.name }}</td>
+        </tr>
+        <tr>
+          <th>Start time</th>
+          <td>{{ app.start_time }}</td>
+        </tr>
+        <tr>
+          <th>End time</th>
+          <td>{{ app.finish_time }}</td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>{% if app.finished %} FINISHED {% else %} RUNNING {% endif %}</td>
+        </tr>
+        <tr>
+          <th>Total cost</th>
+          <td>{{ '%0.2f'|format(cost|float) }}$</td>
+        </tr>
+      </table>
+      <div class="divider"></div>
+      <h3>Container list</h3>
+      <table class="containers">
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Instance IP</th>
+          <th>Instance type</th>
+          <th>Instance kind</th>
+          <th>Cost</th>
+        </tr>
+        {% for container in app.containers %}
+        <tr>
+          <td>{{ container.name }}</td>
+          <td>{% if container.finished %} FINISHED {% else %} RUNNING {% endif %}</td>
+          <td>{{ container.instance.private_ip }}</td>
+          <td>{{ container.instance.instance_type }}</td>
+          <td>{{ container.instance.kind }}</td>
+          {% if container.cost %}
+          <td>{{ '%1.2f'|format(container.cost.amount|float) }}$</td>
+          {% else %}
+          <td>UNKNOWN</td>
+          {% endif %}
+        {% endfor %}
+      </table>
+
+    </div>
+  </body>
+  <footer>
+    <a href="/">Back</a>  
+  </footer>
+</html>

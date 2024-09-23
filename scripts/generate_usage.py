@@ -108,6 +108,7 @@ def generate_container_usage(instance_id, app_name, container_name):
 
         count += 1
         if count == 600:
+            time.sleep(random.randint(1, 3))
             res = r.post(FINISHED_URL.format(container_name))
             print(res.json())
             running = False

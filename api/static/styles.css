@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap');
+
+body {
+  padding-left: 20px;
+  background-color: #2e2e2e;
+  color: #d6d6d6;
+  font-family: Fira Code;
+}
+
+table {
+  width: 1000px;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+th {
+  border-bottom: solid #d6d6d6 1px;
+  text-align: left;
+}
+
+a {
+  color: #d6d6d6;
+}
+
+.v th {
+  border: none;
+  width: 100px;
+}
+
+.v td {
+  padding-left: 64px;
+}
+
+.divider {
+  width: 1000px;
+  border-bottom: solid #d6d6d6 1px;
+  height: 100px;
+}
+
+.containers {
+  width: 100%;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello</title>
+    <link href="{{ url_for('static', path='styles.css') }}" rel="stylesheet">
+  </head>
+  <body>
+    <h2>Application list</h2>
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Start time</th>
+        <th>End time</th>
+        <th>Status</th>
+        <th>Cost</th>
+      </tr>
+      {% for app, cost in applications %}
+      <tr>
+        <td><a href="/{{ app.name }}">{{ app.name }}</a></td>
+        <td>{{ app.start_time }}</td>
+        <td>{{ app.finish_time }}</td>
+        <td>{% if app.finished %} FINISHED {% else %} RUNNING {% endif %}</td>
+        <td>{{ '%0.2f'|format(cost|float) }}$</td>
+      {% endfor %}
+    </table>
+  </body>
+</html>
