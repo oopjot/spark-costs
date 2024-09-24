@@ -1,0 +1,21 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: postgresql
+  namespace: spark-costs-test
+spec:
+  enableLogicalBackup: false
+  teamId: "spark_costs"
+  volume:
+    size: 10Gi
+  numberOfInstances: 1
+  users:
+    spark_costs:
+    - superuser
+    - createdb
+
+  databases:
+    spark_costs: spark_costs
+  postgresql:
+    version: "15"
+
