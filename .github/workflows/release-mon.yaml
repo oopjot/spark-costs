@@ -1,12 +1,6 @@
 name: Release Monitor
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: version
-        required: true
-        default: 1.0.0
-        type: string
+  workflow_dispatch: {}
 
 jobs:
   build-and-upload:
@@ -49,4 +43,3 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: dist/*
-          tag: {{ inputs.tag }}
