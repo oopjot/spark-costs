@@ -19,20 +19,20 @@ spec:
       - name: spark-costs-worker
         image: oopjot/spark-costs:latest
         command: ["celery"]
-        args: ["-A", "worker.celery", "--loglevel", "INFO"]
+        args: ["-A", "worker.celery", "worker", "--loglevel=INFO"]
         envFrom:
-        - secretRef:
+        - configMapRef:
             name: spark-costs
         env:
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              name: spark-costs.postgresql.credentials.postgresql.acid.zalan.do
+              name: spark-costs.spark-costs-db.credentials.postgresql.acid.zalan.do
               key: username
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: spark-costs.postgresql.credentials.postgresql.acid.zalan.do
+              name: spark-costs.spark-costs-db.credentials.postgresql.acid.zalan.do
               key: password
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
@@ -44,3 +44,9 @@ spec:
             secretKeyRef:
               name: spark-costs-aws
               key: AWS_SECRET_ACCESS_KEY
+        resources:
+          requests:
+            cpu: 50m
+            memory: 512Mi
+          limits:
+            memory: 512Mi
