@@ -10,15 +10,16 @@ import (
 	"net/http"
 	"strings"
 	"time"
+  "os"
 
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/prometheus/procfs"
 )
 
 const (
-  USAGE_URL = "http://127.0.0.1:8080/instance/%s/usage"
-  INIT_URL = "http://127.0.0.1:8080/instance"
-  FINISHED_URL = "http://127.0.0.1:8080/container/%s/finish"
+  USAGE = "/instance/%s/usage"
+  INIT = "/instance"
+  FINISHED = "/container/%s/finish"
 )
 
 // /mnt1/yarn/usercache/hadoop/appcache/application_1697720075274_7464/container_1697720075274_7464_01_000036 <nil>
@@ -47,7 +48,8 @@ type Instance struct {
   Architecture string `json:"architecture"`
 }
 
-func totalCPUTime(s *procfs.ProcStat) float64 {
+func totalCPUTime(fs *procfs.FS) float64 {
+  s, _ := fs.Stat()
   c := s.CPUTotal
   user := c.User - c.Guest
   nice := c.Nice - c.GuestNice
@@ -75,7 +77,7 @@ func monitor(fs *procfs.FS, pid int, fc chan Usage, uc chan Usage) {
   app, container := appName(&p)
   pstat, _ := p.Stat()
   start, _ := pstat.StartTime()
-  totalCPU := totalCPUTime(pstat)
+  totalCPU := totalCPUTime(fs)
   u := Usage{
     PID: p.PID,
     App: app,
@@ -143,15 +145,27 @@ func logUsage(u Usage) {
 }
 
 func handleUsage(i string, uc chan Usage) {
+  debug_env := os.Getenv("DEBUG")
+  debug := false
+  if debug_env == "1" || debug_env == "true" {
+    log.Println("DEBUG is ON")
+    debug = true
+  }
   for {
     u := <- uc
-    logUsage(u)
-    go postUsageData(i, u, false)
+    if debug {
+      logUsage(u)
+    }
+    //go postUsageData(i, u, false)
   }
 }
 
 func postUsageData(i string, u Usage, finished bool) {
-  url := fmt.Sprintf(USAGE_URL, i)
+  api_url := os.Getenv("SPARK_COSTS_API_URL")
+  if api_url == "" {
+    log.Fatalln("Undefined environment variable SPARK_COSTS_API_URL")
+  }
+  url := fmt.Sprintf(api_url + USAGE, u.Container)
   data, err := json.Marshal(u); if err != nil {
     log.Printf("ERROR: could not marshal process %d data: %s Skipping.\n", u.PID, err)
     return
@@ -168,7 +182,11 @@ func postUsageData(i string, u Usage, finished bool) {
 }
 
 func postContainerFinished(c string) {
-  url := fmt.Sprintf(FINISHED_URL, c)
+  api_url := os.Getenv("SPARK_COSTS_API_URL")
+  if api_url == "" {
+    log.Fatalln("Undefined environment variable SPARK_COSTS_API_URL")
+  }
+  url := fmt.Sprintf(api_url + FINISHED, c)
   r, err := http.Post(url, "text/plain", bytes.NewBufferString("finished")); if err != nil {
     log.Printf("ERROR: could not send HTTP request: %s\n", err)
     return
@@ -212,11 +230,16 @@ func postMetadata(c *imds.Client) (string, error) {
   host.Kind = kind
 
   data, err := json.Marshal(host)
+  log.Println(data)
   if err != nil {
     return "", fmt.Errorf("ERROR: could not marshal instance metadata: %s", err)
   }
-  
-  r, err := http.Post(INIT_URL, "application/json", bytes.NewBuffer(data))
+
+  api_url := os.Getenv("SPARK_COSTS_API_URL")
+  if api_url == "" {
+    log.Fatalln("Undefined environment variable SPARK_COSTS_API_URL")
+  }
+  r, err := http.Post(api_url + INIT, "application/json", bytes.NewBuffer(data))
   if err != nil {
     return "", fmt.Errorf("Could not send HTTP POST request: %s", err)
   }
@@ -249,6 +272,7 @@ func main() {
       }
       // start monitoring
       procs[pid] = struct{}{}
+      log.Printf("INFO: Starting monitor for PID: %d\n", pid)
       go monitor(&fs, pid, finishedChan, usageChan)
     }
     time.Sleep(1 * time.Second)
