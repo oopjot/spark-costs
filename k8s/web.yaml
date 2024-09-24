@@ -27,13 +27,23 @@ spec:
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              name: spark-costs.postgresql.credentials.postgresql.acid.zalan.do
+              name: spark-costs.spark-costs-db.credentials.postgresql.acid.zalan.do
               key: username
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: spark-costs.postgresql.credentials.postgresql.acid.zalan.do
+              name: spark-costs.spark-costs-db.credentials.postgresql.acid.zalan.do
               key: password
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            memory: 256Mi
+        ports:
+        - containerPort: 8000
+          name: web
+
 ---
 apiVersion: v1
 kind: Service
@@ -44,11 +54,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 8000
-      targetPort: http
+    - port: 80
+      targetPort: web
       protocol: TCP
       name: http
   selector:
-    app:
-      spark-costs-web
+    app: spark-costs-web
 

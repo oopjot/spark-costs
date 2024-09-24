@@ -4,9 +4,9 @@ metadata:
   name: spark-costs
   namespace: spark-costs-test
 data:
-  DB_HOST: spark-costs-postgresql
+  DB_HOST: spark-costs-db
   DB_NAME: spark_costs
-  DB_PORT: 5432
+  DB_PORT: "5432"
   SECRET_API_KEY: super-secret-key
   CELERY_BROKER_URL: redis://redis:6379/0
   CELERY_RESULT_BACKEND: redis://redis:6379/0

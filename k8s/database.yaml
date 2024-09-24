@@ -1,7 +1,7 @@
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
-  name: postgresql
+  name: spark-costs-db
   namespace: spark-costs-test
 spec:
   enableLogicalBackup: false
