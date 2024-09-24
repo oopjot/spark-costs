@@ -99,7 +99,7 @@ def get_container_average_cpu_usage(session: Session, container: Container):
     average_usage = session.scalar(stmt)
     return average_usage
 
-def get_container_average_cpu_usage_for_time_range(session: Session, container: Container, start: int, end: int):
+def get_container_average_cpu_usage_for_time_range(session: Session, container: Container, start: float, end: float):
     stmt = select(func.avg(Usage.cpu_usage)).where(
         (Usage.container_id == container.id) &
         (Usage.time > start) &
