@@ -20,6 +20,7 @@ const (
   USAGE = "/instance/%s/usage"
   INIT = "/instance"
   FINISHED = "/container/%s/finish"
+  SCHEME = "https://"
 )
 
 // /mnt1/yarn/usercache/hadoop/appcache/application_1697720075274_7464/container_1697720075274_7464_01_000036 <nil>
@@ -165,7 +166,7 @@ func postUsageData(i string, u Usage, finished bool) {
   if api_url == "" {
     log.Fatalln("Undefined environment variable SPARK_COSTS_API_URL")
   }
-  url := fmt.Sprintf(api_url + USAGE, u.Container)
+  url := fmt.Sprintf(SCHEME + api_url + USAGE, u.Container)
   data, err := json.Marshal(u); if err != nil {
     log.Printf("ERROR: could not marshal process %d data: %s Skipping.\n", u.PID, err)
     return
@@ -186,7 +187,7 @@ func postContainerFinished(c string) {
   if api_url == "" {
     log.Fatalln("Undefined environment variable SPARK_COSTS_API_URL")
   }
-  url := fmt.Sprintf(api_url + FINISHED, c)
+  url := fmt.Sprintf(SCHEME + api_url + FINISHED, c)
   r, err := http.Post(url, "text/plain", bytes.NewBufferString("finished")); if err != nil {
     log.Printf("ERROR: could not send HTTP request: %s\n", err)
     return
@@ -239,7 +240,7 @@ func postMetadata(c *imds.Client) (string, error) {
   if api_url == "" {
     log.Fatalln("Undefined environment variable SPARK_COSTS_API_URL")
   }
-  r, err := http.Post(api_url + INIT, "application/json", bytes.NewBuffer(data))
+  r, err := http.Post(SCHEME + api_url + INIT, "application/json", bytes.NewBuffer(data))
   if err != nil {
     return "", fmt.Errorf("Could not send HTTP POST request: %s", err)
   }

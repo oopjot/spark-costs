@@ -7,7 +7,7 @@ postgres_uri = config.get_postgres_uri()
 
 engine = create_engine(postgres_uri, echo=True)
 Base.metadata.create_all(bind=engine)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)
 
 def get_db():
     db = SessionLocal()
