@@ -1,0 +1,3 @@
+__pycache__
+k8s/secret.yaml
+k8s/ingress.yaml

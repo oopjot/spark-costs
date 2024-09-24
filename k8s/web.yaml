@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spark-costs-worker
+  name: spark-costs-web
   namespace: spark-costs-test
   labels:
-    app: spark-costs-worker
+    app: spark-costs-web
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: spark-costs-worker
+      app: spark-costs-web
   template:
     metadata:
       labels:
-        app: spark-costs-worker
+        app: spark-costs-web
     spec:
       containers:
-      - name: spark-costs-worker
+      - name: spark-costs-web
         image: oopjot/spark-costs:latest
-        command: ["celery"]
-        args: ["-A", "worker.celery", "--loglevel", "INFO"]
+        command: ["uvicorn"]
+        args: ["main:app", "--host", "0.0.0.0"]
         envFrom:
-        - secretRef:
+        - configMapRef:
             name: spark-costs
         env:
         - name: DB_USER
@@ -34,13 +34,21 @@ spec:
             secretKeyRef:
               name: spark-costs.postgresql.credentials.postgresql.acid.zalan.do
               key: password
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: spark-costs-aws
-              key: AWS_ACCESS_KEY_ID
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: spark-costs-aws
-              key: AWS_SECRET_ACCESS_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-costs-web
+  labels:
+    app: spark-costs-web
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app:
+      spark-costs-web
+
