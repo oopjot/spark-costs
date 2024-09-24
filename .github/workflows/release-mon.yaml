@@ -1,15 +1,48 @@
 name: Release Monitor
 on:
-  push:
-    branches:
-    - main
-    paths:
-    - ./mon
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: version
+        required: true
+        default: 1.0.0
+        type: string
 
 jobs:
-  hello-world:
+  build-and-upload:
     runs-on: ubuntu-latest
     steps:
-      - name: Say hello
-        run: echo "Hello, world"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Build binary
+        run: |
+          mkdir -p dist
+          GOOS=linux GOARCH=amd64 go build -o dist/mon-linux-amd64
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary
+          path: dist/
+  release:
+    needs: build-and-upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries
+
+      - name: Upload
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
