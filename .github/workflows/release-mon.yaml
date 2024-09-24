@@ -11,6 +11,9 @@ on:
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mon
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary
-          path: dist/
+          path: mon/dist/
   release:
     needs: build-and-upload
     runs-on: ubuntu-latest
@@ -40,9 +43,10 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: binaries
+          name: binary
 
       - name: Upload
         uses: softprops/action-gh-release@v1
         with:
           files: dist/*
+          tag: {{ inputs.tag }}

@@ -10,6 +10,9 @@ on:
 jobs:
   build-docker-image:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,11 +27,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t spark-costs -f ./api/Dockerfile ./api
+        run: docker build -t spark-costs -f Dockerfile .
 
       - name: Tag images
         run: docker tag spark-costs oopjot/spark-costs:$GITHUB_SHA && docker tag spark-costs oopjot/spark-costs:latest
 
       - name: Push Docker image to DockerHub
-        run: docker push oopjot/spark-costs:$GITHUB_SHA oopjot/spark-costs:latest
+        run: docker push oopjot/spark-costs:$GITHUB_SHA && docker push oopjot/spark-costs:latest
 
