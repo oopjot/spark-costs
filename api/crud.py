@@ -130,7 +130,8 @@ def list_applications(session: Session):
     stmt = (select(Application, func.sum(ContainerCost.amount).label("cost"))
             .join(Container, Application.containers)
             .join(ContainerCost, Container.cost)
-            .group_by(Application.id))
+            .group_by(Application.id)
+            .order_by(Application.start_time.desc()))
     return session.execute(stmt)
 
 def maybe_update_application_finish_time(session: Session, container: Container, last_usage: Usage | None = None):

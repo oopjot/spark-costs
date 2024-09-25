@@ -22,7 +22,7 @@
         <td>{{ app.start_time }}</td>
         <td>{{ app.finish_time }}</td>
         <td>{% if app.finished %} FINISHED {% else %} RUNNING {% endif %}</td>
-        <td>{{ '%0.2f'|format(cost|float) }}$</td>
+        <td>{{ '%0.5f'|format(cost|float) }}$</td>
       {% endfor %}
     </table>
   </body>
