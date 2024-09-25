@@ -157,7 +157,7 @@ func handleUsage(i string, uc chan Usage) {
     if debug {
       logUsage(u)
     }
-    //go postUsageData(i, u, false)
+    go postUsageData(i, u, false)
   }
 }
 
@@ -166,11 +166,11 @@ func postUsageData(i string, u Usage, finished bool) {
   if api_url == "" {
     log.Fatalln("Undefined environment variable SPARK_COSTS_API_URL")
   }
-  url := fmt.Sprintf(SCHEME + api_url + USAGE, u.Container)
   data, err := json.Marshal(u); if err != nil {
     log.Printf("ERROR: could not marshal process %d data: %s Skipping.\n", u.PID, err)
     return
   }
+  url := fmt.Sprintf(SCHEME + api_url + USAGE, i)
   r, err := http.Post(url, "application/json", bytes.NewBuffer(data)); if err != nil {
     log.Printf("ERROR: could not send HTTP request: %s\n", err)
     return

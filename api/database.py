@@ -5,7 +5,7 @@ from model import Base
 
 postgres_uri = config.get_postgres_uri()
 
-engine = create_engine(postgres_uri, echo=True)
+engine = create_engine(postgres_uri)
 Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)
 
